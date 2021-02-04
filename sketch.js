@@ -1,112 +1,86 @@
+
 const Engine = Matter.Engine;
 const World = Matter.World;
 const Bodies = Matter.Bodies;
 const Body = Matter.Body;
 const Render = Matter.Render;
 const Constraint = Matter.Constraint;
-var bobObject1,bobObject2,bobObject3, bobObject4,bobObject5, roofObject
-var rope1,rope2,rope3, rope4,rope5;
-var world;
+var treeObj, stoneObj,groundObject
+var launcher;
+var mango1,mango2,mango3,mango4,mango5;
+var world,boy;
 
+function preload(){
+	boy=loadImage("boy.png");
+  }
 
 function setup() {
-	createCanvas(1366, 700);
-	rectMode(CENTER);
-
-
+	createCanvas(1300, 600);
 	engine = Engine.create();
 	world = engine.world;
 
-	roofObject=new roof(width/2,height/4,width/7,20);
+	mango1=new mango(1100,100,30);
+	mango2=new mango(1000,80,30);
+	mango3=new mango(930,200,30);
+	mango4=new mango(1150,200,30);
+	mango5=new mango(1030,160,30);
 
-	bobDiameter=40;
+	treeObj=new tree(1050,580);
+	groundObject=new ground(width/2,600,2000,20);
 
-	startBobPositionX=width/2;
-	startBobPositionY=height/4+200;
-	bobObject1=new bob(startBobPositionX-bobDiameter*2,startBobPositionY,bobDiameter);
-	bobObject2=new bob(startBobPositionX-bobDiameter,startBobPositionY,bobDiameter);
-	bobObject3=new bob(startBobPositionX,startBobPositionY,bobDiameter);
-	bobObject4=new bob(startBobPositionX+bobDiameter,startBobPositionY,bobDiameter);
-	bobObject5=new bob(startBobPositionX+bobDiameter*2,startBobPositionY,bobDiameter);
-	
-	
-	//Create a Ground
-	
-
-	var render = Render.create({
-	  element: document.body,
-	  engine: engine,
-	  options: {
-	    width: 1200,
-	    height: 700,
-	    wireframes: false
-	  }
-	});
-
-
-	rope1=new rope(bobObject1.body,roofObject.body,-bobDiameter*2, 0)
-
-	rope2=new rope(bobObject2.body,roofObject.body,-bobDiameter*1, 0)
-	rope3=new rope(bobObject3.body,roofObject.body,0, 0)
-	rope4=new rope(bobObject4.body,roofObject.body,bobDiameter*1, 0)
-	rope5=new rope(bobObject5.body,roofObject.body,bobDiameter*2, 0)
-
+	stoneObj=new Stone(235,420,20);
+	launcher = new Launcher(stoneObj.body,{x :235, y:420});
 
 	Engine.run(engine);
 
-  
 }
-
 
 function draw() {
-  rectMode(CENTER);
+
   background(230);
-  roofObject.display();
-
-  rope1.display()
-  rope2.display()
-  rope3.display()
-  rope4.display()
-  rope5.display()	
-  bobObject1.display();
-  bobObject2.display();
-  bobObject3.display();
-  bobObject4.display();
-  bobObject5.display();
- 
-  
-  
-	
+  //Add code for displaying text here!
+  image(boy ,200,340,200,300);
   
  
-  
-  
- 
-}
-
-function keyPressed() {
-  	if (keyCode === UP_ARROW) {
-
-    	Matter.Body.applyForce(bobObject1.body,bobObject1.body.position,{x:-50,y:-45});
-
-  	}
+  treeObj.display();
+  mango1.display();
+  mango2.display();
+  mango3.display();
+  mango4.display();
+  mango5.display();
+  stoneObj.display();
+  launcher.display();
+  groundObject.display();
+  detectCollision(stoneObj,mango1);
+  detectCollision(stoneObj,mango2);
+  detectCollision(stoneObj,mango3);
+  detectCollision(stoneObj,mango4);
+  detectCollision(stoneObj,mango5);
 }
 
 
-function drawLine(constraint)
-{
-	bobBodyPosition=constraint.bodyA.position
-	roofBodyPosition=constraint.bodyB.position
-
-	roofBodyOffset=constraint.pointB;
-	
-	roofBodyX=roofBodyPosition.x+roofBodyOffset.x
-	roofBodyY=roofBodyPosition.y+roofBodyOffset.y
-	line(bobBodyPosition.x, bobBodyPosition.y, roofBodyX,roofBodyY);
+function mouseDragged(){
+	Matter.Body.setPosition(stoneObj.body,{x: mouseX,y: mouseY});
 }
 
+function mouseReleased(){
+	launcher.fly();
+}
 
+function keyPressed(){
+	if(keyCode === 32){
+		Matter.Body.setPosition(stoneObj.body,{x: 235, y: 420});
+		launcher.attach(stoneObj.body);
 
+	}
+}
 
+function detectCollision(lstone,lmango){
+	mangoBodyPosition=lmango.body.position
+	stoneBodyPosition=lstone.body.position
 
-
+	var distance=dist(stoneBodyPosition.x, stoneBodyPosition.y ,mangoBodyPosition.x, mangoBodyPosition.y)
+	if(distance<=lmango.r+lstone.r){
+		Matter.Body.setStatic(lmango.body,false);
+	}
+}
